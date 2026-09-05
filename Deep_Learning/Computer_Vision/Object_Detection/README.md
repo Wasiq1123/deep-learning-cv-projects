@@ -1,64 +1,47 @@
-# 🧠 Object Detection with Transformers, CNNs, and Vision-Language Models
+# Object Detection
 
-This repository contains multiple object detection implementations using state-of-the-art models in computer vision:
+Four different approaches to object detection, ranging from a classic two-stage detector to a fully zero-shot vision-language model — implemented as separate notebooks so each architecture's behavior can be inspected in isolation.
 
-- [DETR (DEtection TRansformer)](https://arxiv.org/abs/2005.12872)
-- [Faster R-CNN (Region-based CNN)](https://arxiv.org/abs/1506.01497)
-- [Qwen2.5-VL (Vision-Language Large Model)](https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct)
-- [YOLOv8 (You Only Look Once)](https://github.com/ultralytics/ultralytics)
+## Notebooks
 
----
-
-## 📂 Project Structure
-
-📁 Object_Detection
-
-├── DETR_Object_Detection.ipynb
-
-├── FasterRCNN_Object_Detection.ipynb
-
-├── Qwen2.5_VL_Object_Detection.ipynb
-
-├── YOLOv8_Video_Object_Detection.ipynb
-
+| Notebook | Model | Approach |
+|---|---|---|
+| `Faster R-CNN Object Detection.ipynb` | Faster R-CNN (ResNet50-FPN) | Two-stage, anchor-based detection |
+| `Detr Transformer.ipynb` | DETR (ResNet-50 backbone) | End-to-end transformer-based detection |
+| `Yolov8 Video Object Detection.ipynb` | YOLOv8n | Real-time, single-stage video detection |
+| `Qwen2.5 Zero Shot Object detection.ipynb` | Qwen2.5-VL-3B-Instruct | Zero-shot, prompt-based grounding |
 
 ---
 
-## 🔍 Implementations Overview
+## Faster R-CNN
 
-### ⚡ DETR (DEtection TRansformer)
-- Uses Transformer architecture with a ResNet-50 backbone
-- Outputs object bounding boxes and class labels
-- Implemented using HuggingFace's `transformers` and `DetrImageProcessor`
-- Supports high-accuracy end-to-end detection
-- Threshold: `0.86`
-
-### ⚡ Faster R-CNN (CNN-based Detector)
-- ResNet50-FPN backbone pre-trained on COCO dataset
-- Implemented with PyTorch and TorchVision
-- Simple yet accurate method for real-time detection
+- `torchvision.models.detection.fasterrcnn_resnet50_fpn`, loaded with default COCO-pretrained weights
 - Confidence threshold: `0.6`
 
-### ⚡ Qwen2.5-VL (Vision-Language Multimodal Model)
-- Accepts image and text prompt together
-- Performs **Zero-shot object grounding**
-- Output: JSON containing label and bounding box
-- Uses `Qwen/Qwen2.5-VL-3B-Instruct` from Hugging Face
+**Result:** detects **person** (99.97%) and **bicycle** (99.65%) on the test image; lower-confidence spurious detections are filtered out by the threshold.
 
-### ⚡ YOLOv8 (Video Object Detection)
-- Real-time detection on video frames using `ultralytics` YOLOv8n model
-- Supports multiple classes and live rendering
+## DETR (DEtection TRansformer)
+
+- `facebook/detr-resnet-50` via Hugging Face `transformers`, using `DetrImageProcessor` for pre- and post-processing
+- No anchors and no NMS — the model directly predicts a fixed set of boxes and labels, matched via Hungarian matching
+- Detection threshold: `0.86`
+
+**Result:** detects **person** (99.97%) and **bicycle** (99.67%) on the same test image.
+
+## YOLOv8 (Video)
+
+- `ultralytics` YOLOv8n (`yolov8n.pt`)
 - Confidence threshold: `0.5`
-- Frame-by-frame predictions and plotting via `cv2`
+- Runs frame by frame over a video file, annotating and displaying each frame in real time with `results[0].plot()`
 
----
+## Qwen2.5-VL Zero-Shot Detection
 
-## 🧪 Requirements
+- `Qwen/Qwen2.5-VL-3B-Instruct`, loaded via Hugging Face Transformers + `qwen-vl-utils`
+- The model is prompted (through a chat template) to act as an object detector and return strict JSON: `{"bbox_2d": [x1, y1, x2, y2], "label": "class"}`
+- Given an image and a natural-language instruction (e.g. *"Outline the position of elephants"*), it returns a bounding box and label with no training or fine-tuning — purely from the prompt
 
-Install dependencies using pip:
+## Requirements
 
 ```bash
 pip install torch torchvision transformers qwen-vl-utils ultralytics matplotlib opencv-python
-
-If you're using Google Colab:
-!pip install qwen-vl-utils ultralytics
+```
