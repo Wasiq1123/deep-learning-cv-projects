@@ -1,102 +1,44 @@
-# 🧠 Vision-Language Models (VLMs) with CLIP and Qwen2.5-VL
+# Vision-Language Models (VLMs)
 
-This repository showcases powerful **Vision-Language Models** combining image and text understanding, featuring **CLIP** and **Qwen2.5-VL** for tasks such as image captioning, object grounding, and semantic similarity.
+Models that jointly understand images and text — used here for embedding/similarity analysis, zero-shot image captioning, and zero-shot object grounding, with no task-specific training.
 
----
+## Notebooks
 
-## 📂 Project Structure
-
-📁 `Vision_Language_Models`
-
-```
-├── .gitkeep
-├── CLIP Tokenization.ipynb
-├── Owen2.5 Zero Shot Object Detection.ipynb
-├── Owen 2.5 VLMs Image Captioning.ipynb
-```
+| Notebook | Model | Task |
+|---|---|---|
+| `CLIP Tokenization.ipynb` | CLIP (`openai/clip-vit-base-patch32`) | Text/image embeddings & similarity |
+| `Owen 2.5 VLMs Image Captioning.ipynb` | Qwen2.5-VL-3B-Instruct | Zero-shot image captioning |
+| `Owen2.5 Zero Shot Object detection.ipynb` | Qwen2.5-VL-3B-Instruct | Zero-shot object grounding |
 
 ---
 
-## 🔍 Implementations Overview
+## CLIP: Tokenization & Embedding Similarity
 
-### ⚡ CLIP Tokenization & Embedding
+Both text (`CLIPTokenizer`) and images (`CLIPProcessor`) are encoded into a shared 512-dimensional embedding space using `CLIPModel`.
 
-**Notebook**: `CLIP Tokenization.ipynb`
-**Model**: `openai/clip-vit-base-patch32`
+- **Text-text similarity:** four prompts ("a donut", "a cookie", "an airplane", "a cat") are embedded and compared with cosine similarity — semantically related pairs (donut/cookie) score highest against each other.
+- **Image-text similarity:** four images (cat, donut, airplane, cookie) are embedded and compared against the text embeddings using `torch.nn.functional.cosine_similarity`, demonstrating CLIP's cross-modal alignment between visual and textual concepts.
 
-📌 **Highlights**:
+## Qwen2.5-VL: Zero-Shot Image Captioning
 
-* Tokenizes both images and text to generate embeddings
-* Computes **cosine similarity** for image-image and text-text pairs
-* Explores cross-modal relationships using `torch.nn.functional.cosine_similarity`
-* Ideal for **zero-shot classification**, **semantic alignment**, and **embedding analysis**
+- `Qwen/Qwen2.5-VL-3B-Instruct`, loaded with Hugging Face Transformers (`torch_dtype="auto"`, `device_map="auto"`)
+- An image and a text instruction ("Describe this image.") are combined via a chat template and processed with `qwen_vl_utils.process_vision_info`
+- The model generates a natural-language caption for the image with no fine-tuning
 
----
+## Qwen2.5-VL: Zero-Shot Object Grounding
 
-### ⚡ Qwen2.5-VL Image Captioning
+- Same base model, prompted with a system message instructing it to act as an object detector and respond with strict JSON (`{"bbox_2d": [...], "label": "..."}`)
+- Given a user instruction such as *"Outline the position of elephants"*, it returns bounding box coordinates and a label directly from the prompt, with no object-detection-specific training
 
-**Notebook**: `Owen 2.5 VLMs Image Captioning.ipynb`
-**Model**: `Qwen/Qwen2.5-VL-3B-Instruct`
-
-📌 **Highlights**:
-
-* Accepts **multimodal prompts**: (Image + Text)
-* Generates **zero-shot image captions** in natural language
-* Uses HuggingFace Transformers + `qwen-vl-utils`
-* Easy-to-use template-based chat formatting
-
----
-
-### ⚡ Qwen2.5-VL Zero-Shot Object Detection
-
-**Notebook**: `Owen2.5 Zero Shot Object Detection.ipynb`
-**Model**: `Qwen/Qwen2.5-VL-3B-Instruct`
-
-📌 **Highlights**:
-
-* Performs **object grounding** using only visual input + descriptive prompt
-* Outputs **JSON with bounding boxes** and **semantic labels**
-* Perfect for **zero-shot localization** in unseen scenarios
-* No training/fine-tuning required
-
----
-
-## 🧪 Requirements
-
-Install dependencies using pip:
+## Requirements
 
 ```bash
 pip install torch torchvision transformers qwen-vl-utils matplotlib opencv-python
 ```
 
-If you're using **Google Colab** with Hugging Face models:
+If using Google Colab with a gated Hugging Face model:
 
 ```python
-!pip install qwen-vl-utils
-
 from huggingface_hub import login
 login(token="your_huggingface_token")
 ```
-
----
-
-## 💡 Applications
-
-✔️ Zero-shot **image captioning**
-
-✔️ **Visual grounding** without retraining
-
-✔️ **Vision-language alignment** for embedding analysis
-
-✔️ Integration into **multimodal AI agents**, smart search, or chat-based systems
-
----
-
-## 🔗 References
-
-* [OpenAI CLIP Paper](https://arxiv.org/abs/2103.00020)
-* [CLIP on Hugging Face](https://huggingface.co/openai/clip-vit-base-patch32)
-* [Qwen2.5-VL Hugging Face Page](https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct)
-* [qwen-vl-utils GitHub](https://github.com/QwenLM/Qwen-VL)
-
----
