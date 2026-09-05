@@ -1,70 +1,54 @@
-# 🖼️ Image Classification with ViT, ResNet50, VGG16, and CNN (MNIST)
+# Image Classification
 
-This folder contains a set of experiments to compare image classification performance using different deep learning models and techniques. The models include:
+Two experiments exploring image classification from different angles: a CNN trained from scratch, and a benchmark comparison between two pretrained TensorFlow/Keras models.
 
-- 🔬 Vision Transformer (ViT) from HuggingFace Transformers
-- 🧠 ResNet50 and VGG16 from TensorFlow/Keras Applications
-- ✏️ Custom CNN trained on MNIST for handwritten digit recognition
+*(ViT-based classification is covered separately in [Vision Transformers](../Vision_Transformers/README.md).)*
 
----
+## Notebooks
 
-## 📌 Project Highlights
-
-### ✅ 1. Vision Transformer (ViT)
-- 📦 Pretrained Model: [`google/vit-base-patch16-224`](https://huggingface.co/google/vit-base-patch16-224)
-- 📷 Task: Predict image class from a single input image
-- 🛠️ Framework: PyTorch + HuggingFace
-- 🧠 Feature Extractor and Inference via `ViTFeatureExtractor` and `ViTForImageClassification`
-- 📊 Output: Top-1 predicted class using `argmax(-1)`
-
-➡️ **Notebook**: `ViT Image Classification.ipynb`
+| Notebook | What it does |
+|---|---|
+| `Hand_Written_Dataset Recognition.ipynb` | Trains a CNN from scratch on MNIST digits |
+| `Tf Resnet and VGG image classification comparison.ipynb` | Benchmarks pretrained ResNet50 vs. VGG16 on a custom image |
 
 ---
 
-### ✅ 2. ResNet50 vs. VGG16 (TensorFlow)
-- 📷 Task: Classify custom image of crocodile vs. alligator
-- ⚙️ Framework: TensorFlow / Keras Applications
-- 📊 Metrics Compared:
-  - Inference Time
-  - Number of Parameters
-  - Top-1 Prediction and Confidence Score
-- 🧪 ResNet50: [`tf.keras.applications.ResNet50`](https://www.tensorflow.org/api_docs/python/tf/keras/applications/ResNet50)
-- 🧪 VGG16: [`tf.keras.applications.VGG16`](https://www.tensorflow.org/api_docs/python/tf/keras/applications/VGG16)
+## 1. MNIST Digit Classification (CNN from scratch)
 
-➡️ **Notebook**: `Tf Resnet and VGG image classification comparison.ipynb`
+A custom convolutional network built with `tf.keras.Sequential`:
 
----
+```
+Conv2D(32, 3x3, ReLU) → MaxPool(3x3) → Dropout(0.25) → Flatten → Dense(100, ReLU) → Dense(10, Softmax)
+```
 
-### ✅ 3. MNIST Handwritten Digit Classification
-- 📚 Dataset: `keras.datasets.mnist`
-- 🔧 Architecture: Simple CNN with Conv2D → MaxPooling → Dense layers
-- 🧠 Trained on grayscale (28x28) digit images
-- 📈 Evaluation: Accuracy, Confusion Matrix, and Classification Report
-- 🧪 Inference: `model.predict()` and argmax over softmax output
+- **Dataset:** `keras.datasets.mnist` — 60,000 train / 10,000 test, 28×28 grayscale digits
+- **Optimizer / Loss:** Adam, sparse categorical cross-entropy
+- **Training:** 10 epochs, batch size 32, 25% validation split
+- **Evaluation:** confusion matrix and classification report on the held-out test set
 
-➡️ **Notebook**: `Hand_Written_Dataset Recognition.ipynb`
+**Result**
 
----
+| Metric | Value |
+|---|---|
+| Test accuracy | ~98.2% |
+| Test loss | 0.097 |
+| Validation accuracy (during training) | ~98–99% |
 
-## 📊 Comparative Results
+## 2. ResNet50 vs. VGG16 (TensorFlow/Keras Applications)
 
-| Model      | Inference Time (s) | Parameters      | Dataset       | Accuracy / Prediction         |
-|------------|--------------------|------------------|---------------|-------------------------------|
-| ViT        | Fast (~0.61s)      | ~85M             | Custom Image  | Top-1 label (e.g., Tabby Cat) |
-| ResNet50   | Fast (~0.36s)      | ~25.6M           | Custom Image  | Crocodile 🐊                   |
-| VGG16      | Slower (~0.49s)    | ~138M            | Custom Image  | Alligator 🐊                   |
-| CNN (MNIST)| Very Fast          | ~1.1M            | MNIST         | ~99% test accuracy            |
+Both models are loaded with ImageNet-pretrained weights (`tf.keras.applications`) and run on the same custom test image (a photo of an alligator), recording inference time, parameter count, and the top-1 prediction with confidence score for each.
 
----
+**Result**
 
-## 💻 Environment
-- Python 3.8+
-- TensorFlow 2.11+
-- PyTorch
-- HuggingFace Transformers
-- OpenCV
-- NumPy, Matplotlib
+| Model | Parameters | Inference Time | Top-1 Prediction | Confidence |
+|---|---|---|---|---|
+| ResNet50 | ~25.6M | ~0.49s | American alligator | 96.15% |
+| VGG16 | 138,357,544 | ~0.57s | American alligator | 95.29% |
 
-To install requirements:
+Both models correctly identify the subject. ResNet50 is far smaller and slightly faster than VGG16, while reaching marginally higher confidence on this image.
+
+## Requirements
+
 ```bash
-pip install torch torchvision transformers tensorflow opencv-python matplotlib
+pip install tensorflow torch torchvision transformers opencv-python matplotlib scikit-learn
+```
