@@ -1,90 +1,46 @@
-# 🧠 Image Segmentation with Transformers, CNNs, and Vision-Language Models
+# Segmentation
 
-This repository contains multiple image and video segmentation implementations using state-of-the-art models in computer vision:
+Six notebooks covering pixel-level scene understanding, from classic fully-convolutional CNNs to the latest promptable segmentation models — applied to both static images and video.
 
-* [**DeepLabV3 (CNN Semantic Segmentation)**](https://pytorch.org/vision/stable/models/generated/torchvision.models.segmentation.deeplabv3_resnet101.html)
-* [**FCN-ResNet101 (Fully Convolutional Network)**](https://pytorch.org/vision/stable/models/generated/torchvision.models.segmentation.fcn_resnet101.html)
-* [**YOLOv11-Seg (Real-Time Segmentation)**](https://github.com/ultralytics/ultralytics)
-* [**SAM2 (Segment Anything Model v2)**](https://segment-anything.com/)
-* [**FastSAM (Lightweight SAM by Ultralytics)**](https://github.com/ultralytics/ultralytics)
+## Notebooks
 
----
-
-## 📂 Project Structure
-
-```bash
-📁 Image_Segmentation
-
-├── YOLO11_Image_Segmentation.ipynb
-├── YOLO11_Segmentation_in_Video.ipynb
-├── SAM2_Segmentation_in_Video.ipynb
-├── FAST-SAM.ipynb
-├── Deeplabv3_resnet101_Segmentation_in_Video.ipynb
-├── Pytorch_Image_Segmentation.ipynb
-```
+| Notebook | Model | Input |
+|---|---|---|
+| `Pytorch Image Segmentation.ipynb` | FCN-ResNet101 vs. DeepLabV3-ResNet101 | Image |
+| `Deeplabv3_resnet101 Segmentation in Video.ipynb` | DeepLabV3-ResNet101 | Video |
+| `YOLO11 Image Segmentation.ipynb` | YOLO11n-Seg | Image |
+| `YOLO11 Segmentation in Video.ipynb` | YOLO11n-Seg | Video |
+| `SAM2 Segementation in Video.ipynb` | SAM 2.1 (base) | Video |
+| `FAST-SAM.ipynb` | FastSAM-s | Image |
 
 ---
 
-## 🔍 Implementations Overview
+## FCN vs. DeepLabV3 (side-by-side comparison)
 
-### ⚡ [YOLOv11 Segmentation (Real-Time)](https://github.com/ultralytics/ultralytics)
+Both `torchvision.models.segmentation.fcn_resnet101` and `deeplabv3_resnet101`, pretrained on COCO, are run on the same test image. Each model's output tensor is reduced to a per-pixel class mask with `argmax`, color-mapped with OpenCV's `COLORMAP_JET`, and the original image plus both predicted masks are displayed side by side for direct visual comparison.
 
-* Based on Ultralytics YOLOv11 segmentation (`yolo11n-seg.pt`)
-* Ultra-fast video/image segmentation with `.plot()`
-* Integrated with OpenCV for frame-wise rendering
-* Video and image inference supported
+## DeepLabV3 on Video
 
----
+The same DeepLabV3-ResNet101 model is applied frame by frame to a video (each frame resized to 512×512 and normalized with ImageNet statistics), with the predicted class map rendered using `COLORMAP_INFERNO`.
 
-### ⚡ [SAM2 (Segment Anything Model v2)](https://segment-anything.com/)
+## YOLO11 Segmentation
 
-* Powerful vision-language segmentation model by Meta AI
-* Supports zero-shot segmentation
-* Highly accurate and generalized
-* Processes each video frame individually
+`yolo11n-seg.pt` performs instance segmentation, producing both bounding boxes and masks in a single pass.
 
----
+**Result:** on a sample street image, detects 4 persons, 1 bus, and 1 stop sign (~588ms inference), with per-detection confidence, box coordinates, and mask shape printed for each instance. The same model is also run frame by frame on video for real-time segmentation.
 
-### ⚡ [FastSAM (Ultralytics)](https://github.com/ultralytics/ultralytics)
+## SAM2 (Segment Anything Model v2)
 
-* Lightweight, fast alternative to SAM2
-* Ideal for inference on CPUs or embedded systems
-* Supports retina masks, high-resolution inputs
-* Real-time static image segmentation
+Meta's `sam2.1_b`, run through Ultralytics' `SAM` wrapper, processes video frames to generate zero-shot segmentation masks for the objects it finds, without any class-specific training.
 
----
+## FastSAM
 
-### ⚡ [DeepLabV3 + ResNet101](https://pytorch.org/vision/stable/models/generated/torchvision.models.segmentation.deeplabv3_resnet101.html)
+`FastSAM-s.pt`, a lightweight real-time alternative to SAM, segments a test image with `retina_masks=True`, `imgsz=1024`, confidence `0.85`, and IoU `0.9`.
 
-* CNN-based semantic segmentation from PyTorch
-* Pretrained on COCO/Cityscapes
-* Outputs class-wise segmentation maps
-* Best for dense, pixel-level labeling tasks
+**Result:** 11 objects detected in the scene.
 
----
-
-### ⚡ [FCN-ResNet101](https://pytorch.org/vision/stable/models/generated/torchvision.models.segmentation.fcn_resnet101.html)
-
-* Fully Convolutional Network for semantic segmentation
-* Often used for comparison with DeepLabV3
-* Lightweight and easy to deploy
-* Ideal for educational and experimentation purposes
-
----
-
-## 🧪 Requirements
-
-Install all dependencies using:
+## Requirements
 
 ```bash
 pip install torch torchvision ultralytics opencv-python matplotlib Pillow
-```
-
-If using Google Colab, also run:
-
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-
-!pip install ultralytics
 ```
